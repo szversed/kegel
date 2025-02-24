@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino Masculino - Kegel</title>
+    <style>
+        :root {
+            --beige-900: #f5f5dc;
+            --beige-800: #e6e6c4;
+            --beige-700: #d7d7ac;
+            --black: #000000;
+            --black-light: #333333;
+            --white: #ffffff;
+            --gray-300: #b0b0b0;
+            --gray-200: #d1d5db;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, var(--beige-900), var(--beige-800));
+            color: var(--black);
+            overflow-x: hidden;
+            user-select: none;
+        }
+        header {
+            background: var(--beige-700);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--black);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .reset-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            background: none;
+            color: var(--gray-300);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .reset-button:hover {
+            color: var(--black);
+            transform: scale(1.05);
+        }
+        main {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .workout-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+        .workout-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 9999px;
+            background: var(--beige-800);
+            color: var(--black-light);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: transform 0.2s, background 0.3s, color 0.3s;
+        }
+        .workout-tab:hover {
+            transform: scale(1.05);
+        }
+        .workout-tab.active {
+            background: var(--black);
+            color: var(--white);
+            transform: scale(1.05);
+        }
+        .progress-bar {
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .progress-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--black);
+        }
+        .progress-track {
+            flex: 1;
+            height: 0.5rem;
+            background: var(--beige-700);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--black);
+            transition: width 0.5s ease;
+        }
+        .progress-percent {
+            font-size: 0.875rem;
+            color: var(--black-light);
+        }
+        .exercise-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .exercise-card {
+            background: var(--beige-800);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .exercise-card.initial {
+            opacity: 0;
+            animation: slideIn 0.5s ease forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .exercise-card.active {
+            transform: scale(1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .exercise-card:not(.active) {
+            background: var(--beige-900);
+            transform: scale(0.98);
+        }
+        .exercise-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 1rem;
+        }
+        .sets-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .set-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .set-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--black-light);
+            margin-bottom: 0.5rem;
+        }
+        .rep-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .timer-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--black);
+            border-radius: 4px;
+            background: var(--beige-700);
+            color: var(--black);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            width: 100px;
+            text-align: center;
+        }
+        .timer-button:hover {
+            background: var(--gray-200);
+        }
+        .timer-button.active {
+            background: var(--black);
+            color: var(--white);
+        }
+        .timer-display {
+            font-size: 0.875rem;
+            color: var(--black);
+            margin-left: 0.5rem;
+        }
+        .config-container {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        .config-input {
+            width: 5rem;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.25rem;
+            background: var(--beige-700);
+            color: var(--black);
+        }
+        .config-input:focus {
+            border-color: var(--black);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6.7 6.7a8 8 0 1 1 10.6 10.6"/>
+                    <path d="M8.9 8.9a5 5 0 1 1 6.2 6.2"/>
+                    <path d="M11.1 11.1a2 2 0 1 1 1.8 1.8"/>
+                </svg>
+                Treino Masculino
+            </div>
+            <button class="reset-button" onclick="resetWorkout()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+                Resetar
+            </button>
+        </div>
+    </header>
+    <main>
+        <div class="workout-tabs" id="workoutTabs"></div>
+        
+        <div class="progress-bar">
+            <div class="progress-header">
+                <h2 class="progress-title">Progresso</h2>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-percent" id="progressPercent">0%</span>
+            </div>
+        </div>
+
+        <div class="exercise-list" id="exerciseList"></div>
+    </main>
+
+    <script>
+        let workouts = [
+            {
+                day: 'Todos os dias',
+                name: 'Exercício Kegel',
+                exercises: [
+                    {
+                        name: 'Exercício Kegel',
+                        sets: 3,
+                        reps: 8,
+                        restBetweenReps: 15,
+                        restBetweenSets: 30
+                    }
+                ]
+            }
+        ];
+
+        let currentWorkout = 0;
+        let currentExercise = 0;
+        let workoutData = JSON.parse(localStorage.getItem('workoutData') || '{}');
+        let timerInterval = null;
+        let isTimerPaused = false;
+        let timeLeft = 0;
+        let contractionTime = 10;
+        let currentRep = 0;
+        let currentSet = 0;
+        let isInitialRender = true;
+        let timerState = 'contraction';
+
+        function initializeWorkoutData() {
+            workouts.forEach((workout, workoutIndex) => {
+                if (!workoutData[workoutIndex]) {
+                    workoutData[workoutIndex] = {};
+                }
+                workout.exercises.forEach((exercise, exerciseIndex) => {
+                    if (!workoutData[workoutIndex][exerciseIndex] || 
+                        workoutData[workoutIndex][exerciseIndex].completed.length !== exercise.sets ||
+                        workoutData[workoutIndex][exerciseIndex].completed[0].length !== exercise.reps) {
+                        workoutData[workoutIndex][exerciseIndex] = {
+                            completed: Array(exercise.sets).fill().map(() => Array(exercise.reps).fill(false)),
+                            currentRep: 0,
+                            currentSet: 0
+                        };
+                    }
+                });
+            });
+            saveWorkoutData();
+        }
+
+        function saveWorkoutData() {
+            localStorage.setItem('workoutData', JSON.stringify(workoutData));
+        }
+
+        function createWorkoutTabs() {
+            const tabsContainer = document.getElementById('workoutTabs');
+            tabsContainer.innerHTML = '';
+            workouts.forEach((workout, index) => {
+                const button = document.createElement('button');
+                button.className = `workout-tab ${index === currentWorkout ? 'active' : ''}`;
+                button.textContent = `${workout.day} - ${workout.name}`;
+                button.onclick = () => selectWorkout(index);
+                tabsContainer.appendChild(button);
+            });
+        }
+
+        function selectWorkout(index) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            currentWorkout = index;
+            currentExercise = 0;
+            updateUI();
+        }
+
+        function calculateProgress() {
+            const workout = workouts[currentWorkout];
+            const workoutState = workoutData[currentWorkout] || {};
+            let completed = 0;
+            let total = 0;
+
+            workout.exercises.forEach((exercise, exerciseIndex) => {
+                total += exercise.sets * exercise.reps;
+                completed += (workoutState[exerciseIndex]?.completed || [])
+                    .flat()
+                    .filter(Boolean).length;
+            });
+
+            return Math.round((completed / total) * 100) || 0;
+        }
+
+        function updateProgress() {
+            const progress = calculateProgress();
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressPercent').textContent = `${progress}%`;
+        }
+
+        function createExerciseCards() {
+            const container = document.getElementById('exerciseList');
+            container.innerHTML = '';
+            const workout = workouts[currentWorkout];
+            workout.exercises.forEach((exercise, exerciseIndex) => {
+                const card = document.createElement('div');
+                card.className = `exercise-card ${exerciseIndex === currentExercise ? 'active' : ''} ${isInitialRender ? 'initial' : ''}`;
+                if (isInitialRender) {
+                    card.style.animationDelay = `${exerciseIndex * 0.1}s`;
+                }
+                card.dataset.exerciseIndex = exerciseIndex;
+
+                const name = document.createElement('h3');
+                name.className = 'exercise-name';
+                name.textContent = exercise.name;
+                card.appendChild(name);
+
+                const configContainer = document.createElement('div');
+                configContainer.className = 'config-container';
+                configContainer.innerHTML = `
+                    <label>Tempo de Contração (s):</label>
+                    <input type="number" class="config-input" value="${contractionTime}" min="1" onchange="updateContractionTime(this.value)">
+                    <label>Séries:</label>
+                    <input type="number" class="config-input" value="${exercise.sets}" min="1" onchange="updateSets(${exerciseIndex}, this.value)">
+                    <label>Repetições:</label>
+                    <input type="number" class="config-input" value="${exercise.reps}" min="1" onchange="updateReps(${exerciseIndex}, this.value)">
+                `;
+                card.appendChild(configContainer);
+
+                const setsContainer = document.createElement('div');
+                setsContainer.className = 'sets-container';
+                card.appendChild(setsContainer);
+
+                container.appendChild(card);
+                updateExerciseCard(exerciseIndex);
+            });
+            isInitialRender = false;
+        }
+
+        function updateContractionTime(newTime) {
+            contractionTime = parseInt(newTime) || 10;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timerState = 'contraction';
+                timeLeft = 0;
+            }
+            updateUI();
+        }
+
+        function updateSets(exerciseIndex, newSets) {
+            const sets = parseInt(newSets) || 1;
+            workouts[currentWorkout].exercises[exerciseIndex].sets = sets;
+            const currentCompleted = workoutData[currentWorkout][exerciseIndex].completed;
+            const reps = workouts[currentWorkout].exercises[exerciseIndex].reps;
+            workoutData[currentWorkout][exerciseIndex].completed = Array(sets).fill().map((_, i) => 
+                i < currentCompleted.length ? currentCompleted[i] : Array(reps).fill(false)
+            );
+            saveWorkoutData();
+            updateUI();
+        }
+
+        function updateReps(exerciseIndex, newReps) {
+            const reps = parseInt(newReps) || 1;
+            workouts[currentWorkout].exercises[exerciseIndex].reps = reps;
+            const currentCompleted = workoutData[currentWorkout][exerciseIndex].completed;
+            workoutData[currentWorkout][exerciseIndex].completed = currentCompleted.map(set => {
+                const newSet = Array(reps).fill(false);
+                set.forEach((val, i) => {
+                    if (i < reps) newSet[i] = val;
+                });
+                return newSet;
+            });
+            saveWorkoutData();
+            updateUI();
+        }
+
+        function updateExerciseCard(exerciseIndex) {
+            const workout = workouts[currentWorkout];
+            const exercise = workout.exercises[exerciseIndex];
+            const card = document.querySelector(`.exercise-card[data-exercise-index="${exerciseIndex}"]`);
+            if (!card) return;
+
+            card.className = `exercise-card ${exerciseIndex === currentExercise ? 'active' : ''}`;
+            const setsContainer = card.querySelector('.sets-container');
+            setsContainer.innerHTML = '';
+
+            for (let setIndex = 0; setIndex < exercise.sets; setIndex++) {
+                const setRow = document.createElement('div');
+                setRow.className = 'set-row';
+
+                const label = document.createElement('span');
+                label.className = 'set-label';
+                label.textContent = `Série ${setIndex + 1}`;
+                setRow.appendChild(label);
+
+                for (let repIndex = 0; repIndex < exercise.reps; repIndex++) {
+                    const repContainer = document.createElement('div');
+                    repContainer.className = 'rep-container';
+
+                    const button = document.createElement('button');
+                    button.className = `timer-button ${workoutData[currentWorkout][exerciseIndex].completed[setIndex][repIndex] ? 'active' : ''}`;
+                    button.textContent = `Rep ${repIndex + 1}`;
+                    button.onclick = () => startTimer(exerciseIndex, setIndex, repIndex);
+                    repContainer.appendChild(button);
+
+                    if (exerciseIndex === currentExercise && setIndex === currentSet && repIndex === currentRep && timeLeft > 0) {
+                        const timerDisplay = document.createElement('span');
+                        timerDisplay.className = 'timer-display';
+                        timerDisplay.textContent = `${timeLeft}s (${timerState === 'contraction' ? 'Contração' : timerState === 'restRep' ? 'Descanso Rep' : 'Descanso Série'})`;
+                        repContainer.appendChild(timerDisplay);
+                    }
+
+                    setRow.appendChild(repContainer);
+                }
+
+                setsContainer.appendChild(setRow);
+            }
+        }
+
+        function startTimer(exerciseIndex, setIndex, repIndex) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            currentExercise = exerciseIndex;
+            currentSet = setIndex;
+            currentRep = repIndex;
+
+            if (!workoutData[currentWorkout][exerciseIndex].completed[setIndex][repIndex]) {
+                timerState = 'contraction';
+                timeLeft = contractionTime;
+                updateUI();
+
+                timerInterval = setInterval(() => {
+                    if (!isTimerPaused) {
+                        timeLeft--;
+                        updateExerciseCard(exerciseIndex);
+
+                        if (timeLeft <= 0) {
+                            if (timerState === 'contraction') {
+                                workoutData[currentWorkout][exerciseIndex].completed[setIndex][repIndex] = true;
+                                saveWorkoutData();
+
+                                if (repIndex === workouts[currentWorkout].exercises[exerciseIndex].reps - 1) {
+                                    if (setIndex === workouts[currentWorkout].exercises[exerciseIndex].sets - 1) {
+                                        clearInterval(timerInterval);
+                                        timerInterval = null;
+                                        updateUI();
+                                    } else {
+                                        timerState = 'restSet';
+                                        timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenSets;
+                                    }
+                                } else {
+                                    timerState = 'restRep';
+                                    timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenReps;
+                                }
+                            } else if (timerState === 'restRep') {
+                                currentRep++;
+                                if (current
