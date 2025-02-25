@@ -527,4 +527,74 @@
                                 }
                             } else if (timerState === 'restRep') {
                                 currentRep++;
-                                if (current
+                                if (currentRep < workouts[currentWorkout].exercises[exerciseIndex].reps) {
+                                    timerState = 'contraction';
+                                    timeLeft = contractionTime;
+                                } else {
+                                    currentRep = 0;
+                                    currentSet++;
+                                    if (currentSet < workouts[currentWorkout].exercises[exerciseIndex].sets) {
+                                        timerState = 'restSet';
+                                        timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenSets;
+                                    } else {
+                                        clearInterval(timerInterval);
+                                        timerInterval = null;
+                                    }
+                                }
+                            } else if (timerState === 'restSet') {
+                                timerState = 'contraction';
+                                timeLeft = contractionTime;
+                            }
+                            updateUI();
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetWorkout() {
+            if (confirm('Tem certeza que deseja resetar todos os dados?')) {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                localStorage.removeItem('workoutData');
+                workoutData = {};
+                currentExercise = 0;
+                currentSet = 0;
+                currentRep = 0;
+                timeLeft = 0;
+                isTimerPaused = false;
+                timerState = 'contraction';
+                isInitialRender = true;
+                contractionTime = 10;
+                workouts = [{
+                    day: 'Todos os dias',
+                    name: 'Exercício Kegel',
+                    exercises: [{
+                        name: 'Exercício Kegel',
+                        sets: 3,
+                        reps: 8,
+                        restBetweenReps: 15,
+                        restBetweenSets: 30
+                    }]
+                }];
+                initializeWorkoutData();
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.workout-tab').forEach((tab, index) => {
+                tab.className = `workout-tab ${index === currentWorkout ? 'active' : ''}`;
+            });
+            updateProgress();
+            createExerciseCards();
+        }
+
+        initializeWorkoutData();
+        createWorkoutTabs();
+        updateUI();
+    </script>
+</body>
+</html>
