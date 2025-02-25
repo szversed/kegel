@@ -52,22 +52,6 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
-        .reset-button {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border: none;
-            background: none;
-            color: var(--gray-300);
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: transform 0.2s, color 0.2s;
-        }
-        .reset-button:hover {
-            color: var(--black);
-            transform: scale(1.05);
-        }
         main {
             max-width: 80rem;
             margin: 0 auto;
@@ -246,13 +230,6 @@
                 </svg>
                 Treino Masculino
             </div>
-            <button class="reset-button" onclick="resetWorkout()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                    <path d="M3 3v5h5"/>
-                </svg>
-                Resetar
-            </button>
         </div>
     </header>
     <main>
@@ -272,7 +249,6 @@
     </main>
 
     <script>
-        // Valores padrão iniciais
         const defaultWorkouts = [{
             day: 'Todos os dias',
             name: 'Exercício Kegel',
@@ -284,12 +260,8 @@
                 restBetweenSets: 30
             }]
         }];
-        
-        // Carrega os valores salvos ou usa os padrões
-        let workouts = JSON.parse(localStorage.getItem('workouts')) || JSON.parse(JSON.stringify(defaultWorkouts));
-        let previousWorkouts = JSON.parse(JSON.stringify(workouts)); // Estado anterior
-        let previousContractionTime = 10; // Estado anterior do tempo de contração
 
+        let workouts = JSON.parse(localStorage.getItem('workouts')) || JSON.parse(JSON.stringify(defaultWorkouts));
         let currentWorkout = 0;
         let currentExercise = 0;
         let workoutData = JSON.parse(localStorage.getItem('workoutData') || '{}');
@@ -326,11 +298,6 @@
             localStorage.setItem('workoutData', JSON.stringify(workoutData));
             localStorage.setItem('workouts', JSON.stringify(workouts));
             localStorage.setItem('contractionTime', contractionTime);
-        }
-
-        function savePreviousState() {
-            previousWorkouts = JSON.parse(JSON.stringify(workouts)); // Salva o estado atual como anterior
-            previousContractionTime = contractionTime;
         }
 
         function createWorkoutTabs() {
@@ -417,7 +384,6 @@
         }
 
         function updateContractionTime(newTime) {
-            savePreviousState(); // Salva o estado antes da alteração
             contractionTime = parseInt(newTime) || 10;
             if (timerInterval) {
                 clearInterval(timerInterval);
@@ -430,7 +396,6 @@
         }
 
         function updateSets(exerciseIndex, newSets) {
-            savePreviousState(); // Salva o estado antes da alteração
             const sets = parseInt(newSets) || 1;
             workouts[currentWorkout].exercises[exerciseIndex].sets = sets;
             const currentCompleted = workoutData[currentWorkout][exerciseIndex].completed;
@@ -443,7 +408,6 @@
         }
 
         function updateReps(exerciseIndex, newReps) {
-            savePreviousState(); // Salva o estado antes da alteração
             const reps = parseInt(newReps) || 1;
             workouts[currentWorkout].exercises[exerciseIndex].reps = reps;
             const currentCompleted = workoutData[currentWorkout][exerciseIndex].completed;
@@ -523,67 +487,28 @@
                         if (timeLeft <= 0) {
                             if (timerState === 'contraction') {
                                 workoutData[currentWorkout][exerciseIndex].completed[setIndex][repIndex] = true;
+                                timerState = 'restRep';
+                                timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenReps;
                                 saveWorkoutData();
-
-                                if (repIndex === workouts[currentWorkout].exercises[exerciseIndex].reps - 1) {
-                                    if (setIndex === workouts[currentWorkout].exercises[exerciseIndex].sets - 1) {
-                                        clearInterval(timerInterval);
-                                        timerInterval = null;
-                                        updateUI();
-                                    } else {
-                                        timerState = 'restSet';
-                                        timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenSets;
-                                    }
-                                } else {
-                                    timerState = 'restRep';
-                                    timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenReps;
-                                }
+                                updateUI();
                             } else if (timerState === 'restRep') {
-                                currentRep++;
-                                if (currentRep < workouts[currentWorkout].exercises[exerciseIndex].reps) {
-                                    timerState = 'contraction';
-                                    timeLeft = contractionTime;
+                                if (repIndex === workouts[currentWorkout].exercises[exerciseIndex].reps - 1 && 
+                                    setIndex < workouts[currentWorkout].exercises[exerciseIndex].sets - 1) {
+                                    timerState = 'restSet';
+                                    timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenSets;
                                 } else {
-                                    currentRep = 0;
-                                    currentSet++;
-                                    if (currentSet < workouts[currentWorkout].exercises[exerciseIndex].sets) {
-                                        timerState = 'restSet';
-                                        timeLeft = workouts[currentWorkout].exercises[exerciseIndex].restBetweenSets;
-                                    } else {
-                                        clearInterval(timerInterval);
-                                        timerInterval = null;
-                                    }
+                                    clearInterval(timerInterval);
+                                    timerInterval = null;
                                 }
+                                updateUI();
                             } else if (timerState === 'restSet') {
-                                timerState = 'contraction';
-                                timeLeft = contractionTime;
+                                clearInterval(timerInterval);
+                                timerInterval = null;
+                                updateUI();
                             }
-                            updateUI();
                         }
                     }
                 }, 1000);
-            }
-        }
-
-        function resetWorkout() {
-            if (confirm('Tem certeza que deseja voltar ao estado anterior?')) {
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                }
-                workouts = JSON.parse(JSON.stringify(previousWorkouts)); // Restaura o estado anterior
-                contractionTime = previousContractionTime;
-                workoutData = {}; // Limpa os dados de progresso
-                currentExercise = 0;
-                currentSet = 0;
-                currentRep = 0;
-                timeLeft = 0;
-                isTimerPaused = false;
-                timerState = 'contraction';
-                isInitialRender = true;
-                initializeWorkoutData(); // Re inicializa com os valores anteriores
-                saveWorkoutData(); // Salva o estado restaurado
-                updateUI(); // Atualiza a interface imediatamente
             }
         }
 
