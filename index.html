@@ -272,29 +272,28 @@
     </main>
 
     <script>
-        let workouts = [
-            {
-                day: 'Todos os dias',
+        // Valores padrão
+        const defaultWorkouts = [{
+            day: 'Todos os dias',
+            name: 'Exercício Kegel',
+            exercises: [{
                 name: 'Exercício Kegel',
-                exercises: [
-                    {
-                        name: 'Exercício Kegel',
-                        sets: 3,
-                        reps: 8,
-                        restBetweenReps: 15,
-                        restBetweenSets: 30
-                    }
-                ]
-            }
-        ];
+                sets: 3,
+                reps: 8,
+                restBetweenReps: 15,
+                restBetweenSets: 30
+            }]
+        }];
 
+        // Carrega os valores salvos ou usa os padrões
+        let workouts = JSON.parse(localStorage.getItem('workouts')) || defaultWorkouts;
         let currentWorkout = 0;
         let currentExercise = 0;
         let workoutData = JSON.parse(localStorage.getItem('workoutData') || '{}');
         let timerInterval = null;
         let isTimerPaused = false;
         let timeLeft = 0;
-        let contractionTime = 10;
+        let contractionTime = parseInt(localStorage.getItem('contractionTime')) || 10;
         let currentRep = 0;
         let currentSet = 0;
         let isInitialRender = true;
@@ -322,6 +321,8 @@
 
         function saveWorkoutData() {
             localStorage.setItem('workoutData', JSON.stringify(workoutData));
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+            localStorage.setItem('contractionTime', contractionTime);
         }
 
         function createWorkoutTabs() {
@@ -415,6 +416,7 @@
                 timerState = 'contraction';
                 timeLeft = 0;
             }
+            saveWorkoutData();
             updateUI();
         }
 
@@ -558,7 +560,7 @@
                     clearInterval(timerInterval);
                     timerInterval = null;
                 }
-                localStorage.removeItem('workoutData');
+                workouts = JSON.parse(JSON.stringify(defaultWorkouts)); // Clona os valores padrão
                 workoutData = {};
                 currentExercise = 0;
                 currentSet = 0;
@@ -568,19 +570,9 @@
                 timerState = 'contraction';
                 isInitialRender = true;
                 contractionTime = 10;
-                workouts = [{
-                    day: 'Todos os dias',
-                    name: 'Exercício Kegel',
-                    exercises: [{
-                        name: 'Exercício Kegel',
-                        sets: 3,
-                        reps: 8,
-                        restBetweenReps: 15,
-                        restBetweenSets: 30
-                    }]
-                }];
-                initializeWorkoutData();
-                updateUI();
+                localStorage.clear(); // Limpa tudo do localStorage
+                initializeWorkoutData(); // Re inicializa com valores padrão
+                updateUI(); // Atualiza a interface imediatamente
             }
         }
 
