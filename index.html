@@ -52,6 +52,22 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
+        .reset-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            background: none;
+            color: var(--gray-300);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .reset-button:hover {
+            color: var(--black);
+            transform: scale(1.05);
+        }
         main {
             max-width: 80rem;
             margin: 0 auto;
@@ -230,6 +246,13 @@
                 </svg>
                 Treino Masculino
             </div>
+            <button class="reset-button" onclick="resetWorkout()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+                Resetar
+            </button>
         </div>
     </header>
     <main>
@@ -509,6 +532,28 @@
                         }
                     }
                 }, 1000);
+            }
+        }
+
+        function resetWorkout() {
+            if (confirm('Tem certeza que deseja resetar para os valores padrão?')) {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                workouts = JSON.parse(JSON.stringify(defaultWorkouts));
+                workoutData = {};
+                currentExercise = 0;
+                currentSet = 0;
+                currentRep = 0;
+                timeLeft = 0;
+                isTimerPaused = false;
+                timerState = 'contraction';
+                isInitialRender = true;
+                contractionTime = 10;
+                localStorage.clear();
+                initializeWorkoutData();
+                updateUI();
             }
         }
 
