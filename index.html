@@ -1,9 +1,10 @@
+html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treino Masculino - Kegel</title>
+    <title>Treino Masculino - Kegel Avançado</title>
     <style>
         :root {
             --beige-900: #f5f5dc;
@@ -272,17 +273,63 @@
     </main>
 
     <script>
-        const defaultWorkouts = [{
-            day: 'Todos os dias',
-            name: 'Exercício Kegel',
-            exercises: [{
-                name: 'Exercício Kegel',
-                sets: 3,
-                reps: 8,
-                restBetweenReps: 15,
-                restBetweenSets: 30
-            }]
-        }];
+        const defaultWorkouts = [
+            {
+                day: 'Segunda-feira',
+                name: 'Piscadas Intensas',
+                exercises: [{
+                    name: 'Piscadas Intensas',
+                    sets: 5,
+                    reps: 20,
+                    restBetweenReps: 5,  // Ajustado para nível avançado (menos descanso)
+                    restBetweenSets: 10  // Ajustado para nível avançado
+                }]
+            },
+            {
+                day: 'Terça-feira',
+                name: 'Piscadas Intensas',
+                exercises: [{
+                    name: 'Piscadas Intensas',
+                    sets: 5,
+                    reps: 25,
+                    restBetweenReps: 5,
+                    restBetweenSets: 10
+                }]
+            },
+            {
+                day: 'Quarta-feira',
+                name: 'Piscadas Intensas',
+                exercises: [{
+                    name: 'Piscadas Intensas',
+                    sets: 6,
+                    reps: 20,
+                    restBetweenReps: 5,
+                    restBetweenSets: 10
+                }]
+            },
+            {
+                day: 'Quinta-feira',
+                name: 'Piscadas Intensas',
+                exercises: [{
+                    name: 'Piscadas Intensas',
+                    sets: 6,
+                    reps: 25,
+                    restBetweenReps: 5,
+                    restBetweenSets: 10
+                }]
+            },
+            {
+                day: 'Sexta-feira',
+                name: 'Piscadas Intensas',
+                exercises: [{
+                    name: 'Piscadas Intensas',
+                    sets: 7,
+                    reps: 20,
+                    restBetweenReps: 5,
+                    restBetweenSets: 10
+                }]
+            }
+        ];
 
         let workouts = JSON.parse(localStorage.getItem('workouts')) || JSON.parse(JSON.stringify(defaultWorkouts));
         let currentWorkout = 0;
@@ -291,7 +338,7 @@
         let timerInterval = null;
         let isTimerPaused = false;
         let timeLeft = 0;
-        let contractionTime = parseInt(localStorage.getItem('contractionTime')) || 10;
+        let contractionTime = parseInt(localStorage.getItem('contractionTime')) || 1; // Ajustado para piscadas rápidas (0,5s por piscada, mas 1s para interface)
         let currentRep = 0;
         let currentSet = 0;
         let isInitialRender = true;
@@ -329,7 +376,7 @@
             workouts.forEach((workout, index) => {
                 const button = document.createElement('button');
                 button.className = `workout-tab ${index === currentWorkout ? 'active' : ''}`;
-                button.textContent = `${workout.day} - ${workout.name}`;
+                button.textContent = `${workout.day}`;
                 button.onclick = () => selectWorkout(index);
                 tabsContainer.appendChild(button);
             });
@@ -387,11 +434,11 @@
                 const configContainer = document.createElement('div');
                 configContainer.className = 'config-container';
                 configContainer.innerHTML = `
-                    <label>Tempo de Contração (s):</label>
+                    <label>Tempo de Piscada (s):</label>
                     <input type="number" class="config-input" value="${contractionTime}" min="1" onchange="updateContractionTime(this.value)">
                     <label>Séries:</label>
                     <input type="number" class="config-input" value="${exercise.sets}" min="1" onchange="updateSets(${exerciseIndex}, this.value)">
-                    <label>Repetições:</label>
+                    <label>Piscadas:</label>
                     <input type="number" class="config-input" value="${exercise.reps}" min="1" onchange="updateReps(${exerciseIndex}, this.value)">
                 `;
                 card.appendChild(configContainer);
@@ -407,7 +454,7 @@
         }
 
         function updateContractionTime(newTime) {
-            contractionTime = parseInt(newTime) || 10;
+            contractionTime = parseInt(newTime) || 1;
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
@@ -470,14 +517,14 @@
 
                     const button = document.createElement('button');
                     button.className = `timer-button ${workoutData[currentWorkout][exerciseIndex].completed[setIndex][repIndex] ? 'active' : ''}`;
-                    button.textContent = `Rep ${repIndex + 1}`;
+                    button.textContent = `Piscada ${repIndex + 1}`;
                     button.onclick = () => startTimer(exerciseIndex, setIndex, repIndex);
                     repContainer.appendChild(button);
 
                     if (exerciseIndex === currentExercise && setIndex === currentSet && repIndex === currentRep && timeLeft > 0) {
                         const timerDisplay = document.createElement('span');
                         timerDisplay.className = 'timer-display';
-                        timerDisplay.textContent = `${timeLeft}s (${timerState === 'contraction' ? 'Contração' : timerState === 'restRep' ? 'Descanso Rep' : 'Descanso Série'})`;
+                        timerDisplay.textContent = `${timeLeft}s (${timerState === 'contraction' ? 'Piscada' : timerState === 'restRep' ? 'Descanso Rep' : 'Descanso Série'})`;
                         repContainer.appendChild(timerDisplay);
                     }
 
@@ -550,7 +597,7 @@
                 isTimerPaused = false;
                 timerState = 'contraction';
                 isInitialRender = true;
-                contractionTime = 10;
+                contractionTime = 1; // Para piscadas rápidas
                 localStorage.clear();
                 initializeWorkoutData();
                 updateUI();
